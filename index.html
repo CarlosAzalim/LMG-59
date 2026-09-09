@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realocação de Volumosos</title>
+    <title>Sinergia de Utilitarios</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -692,7 +692,31 @@
     let allDriversList = [];
 
     const cleanBasic = t => String(t||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-    function getTokens(str) { if(!str) return []; let s = cleanBasic(str); let rawParts = s.split(/[\;\,\|\/\-\n\r]/); let tokens = []; for(let p of rawParts) { let t = p.trim().replace(/^[^A-Z0-9]+|[^A-Z0-9]+$/g, ""); if(t.length > 2) tokens.push(t); } return tokens; }
+
+    // =====================================================================
+    // CORREÇÃO: LÓGICA DO TOKEN PARA "VIAGEM -"
+    // =====================================================================
+    function getTokens(str) {
+        if(!str) return [];
+        let s = cleanBasic(str);
+       
+        // Protege "VIAGEM -" substituindo temporariamente para não ser quebrado no split
+        s = s.replace(/\bVIAGEM\s*-\s*/g, "VIAGEM@");
+       
+        let rawParts = s.split(/[\;\,\|\/\-\n\r]/);
+        let tokens = [];
+       
+        for(let p of rawParts) {
+            // Restaura o "VIAGEM -" e limpa as bordas
+            let t = p.replace(/VIAGEM@/g, "VIAGEM - ").trim().replace(/^[^A-Z0-9]+|[^A-Z0-9]+$/g, "");
+           
+            if(t === "VIAGEM") continue; // Ignora caso caia alguma palavra VIAGEM solta acidentalmente
+            if(t.length > 2) tokens.push(t);
+        }
+        return tokens;
+    }
+    // =====================================================================
+
     const isAll = c => { let t = cleanBasic(c); return ['ALL','TODOS','TODAS','QUALQUER','CURINGA'].some(k => t.includes(k)); };
     const shuffle = a => a.sort(()=>Math.random()-0.5);
 
